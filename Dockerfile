@@ -5,10 +5,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# 1. 安装基础系统工具（Git、Bash、Curl 等下载依赖所需工具）
-RUN apk add --no-cache git bash curl wget unzip tar ca-certificates
+# 1. 安装基础系统工具（新增 python3 解决第 41 行报错）
+RUN apk add --no-cache git bash curl wget unzip tar ca-certificates python3
 
-# 2. 全局安装 pnpm 和 bun（解决脚本执行过程中缺失 command 的 127 错误）
+# 2. 全局安装 pnpm 和 bun
 RUN npm install -g pnpm bun
 
 # 3. 拉取项目源码
@@ -31,7 +31,7 @@ WORKDIR /app
 # 1. 安装轻量级静态 HTTP 服务器
 RUN npm install -g serve
 
-# 2. 仅从构建阶段复制 Next.js 生成的 out 静态文件
+# 2. 从构建阶段复制 Next.js 生成的静态文件目录 out
 COPY --from=builder /app/apps/web/out ./out
 
 # 3. 暴露 80 端口
