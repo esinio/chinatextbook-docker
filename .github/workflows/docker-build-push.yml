@@ -17,11 +17,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. 设置 QEMU (支持多架构构建，如 amd64, arm64)
+      # 2. 设置 QEMU (用于多架构镜像构建，如 x86_64, arm64)
       - name: Set up QEMU
-        uses: actions/docker-buildx-backports@v3
+        uses: docker/setup-qemu-action@v3
 
-      # 3. 设置 Docker Buildx
+      # 3. 设置 Docker Buildx (构建扩展引擎)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -45,13 +45,13 @@ jobs:
 
       # 6. 编译并推送到 Docker Hub
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # 开启构建缓存加快后续构建速度
+          # 开启 GitHub Actions 构建缓存加快后续构建速度
           cache-from: type=gha
           cache-to: type=gha,mode=max
