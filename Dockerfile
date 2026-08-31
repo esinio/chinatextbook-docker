@@ -5,17 +5,16 @@ FROM alpine:3.23 AS builder
 
 WORKDIR /app
 
-# 安装编译阶段所需的系统工具
-RUN apk add --no-cache git bash nodejs npm
+# 1. 安装系统依赖：新增了 curl, wget, unzip, tar, ca-certificates 等常见资源下载解压工具
+RUN apk add --no-cache git bash nodejs npm curl wget unzip tar ca-certificates
 
-# 1. 拉取项目源码
+# 2. 拉取项目源码
 RUN git clone https://github.com/wuwangzhang1216/ChinaTextbookStudyFree.git .
 
-# 2. 执行脚本下载资源文件
-RUN bash scripts/download-assets.sh
+# 3. 赋予脚本执行权限并运行资源下载脚本
+RUN chmod +x scripts/download-assets.sh && bash scripts/download-assets.sh
 
-# 3. 安装依赖并构建静态文件
-# 注：根据项目实际逻辑，先安装根目录依赖，然后进入 apps/web 执行构建
+# 4. 安装依赖并构建静态文件
 RUN npm install
 RUN cd apps/web && npm run build
 
@@ -29,11 +28,9 @@ WORKDIR /app
 # 全局安装静态文件服务器 serve
 RUN npm install -g serve
 
-# 仅从构建阶段复制 Next.js 生成的 out 静态文件目录
+# 复制生成的 static out 目录
 COPY --from=builder /app/apps/web/out ./out
 
-# 暴露 80 端口
 EXPOSE 80
 
-# 启动静态文件服务器
 CMD ["serve", "out", "-l", "80"]
