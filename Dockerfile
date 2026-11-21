@@ -18,8 +18,11 @@ RUN git clone https://github.com/wuwangzhang1216/ChinaTextbookStudyFree.git .
 RUN chmod +x scripts/download-assets.sh && bash scripts/download-assets.sh
 
 # 5. 安装项目依赖并构建静态 web 文件
-RUN npm install
-RUN cd apps/web && npm run build
+RUN npm install && \
+    cd apps/web && \
+    npm run build && \
+    cd /app && \
+    rm -rf node_modules apps/web/node_modules ~/.npm ~/.cache
 
 # ==========================================
 # 阶段 2：运行阶段 (Runner) - 使用 Nginx
