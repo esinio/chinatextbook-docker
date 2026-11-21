@@ -17,6 +17,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # 必须设置 tool-cache 为 true，才能释放出 20GB+ 空间
+          tool-cache: true
+          large-packages: true
+
       # 2. 设置 QEMU (用于多架构镜像构建，如 x86_64, arm64)
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -55,4 +62,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           # 开启 GitHub Actions 构建缓存加快后续构建速度
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-to: type=gha,mode=max
