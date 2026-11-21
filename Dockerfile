@@ -6,7 +6,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # 1. 安装基础系统工具
-RUN apk add --no-cache git bash curl wget unzip tar ca-certificates python3
+RUN apk add --no-cache git bash curl wget unzip tar ca-certificates python3 ffmpeg
 
 # 2. 全局安装 pnpm 和 bun
 RUN npm install -g pnpm bun
