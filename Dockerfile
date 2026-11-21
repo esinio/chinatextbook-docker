@@ -5,7 +5,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# 1. 安装基础系统工具（新增 python3 解决第 41 行报错）
+# 1. 安装基础系统工具
 RUN apk add --no-cache git bash curl wget unzip tar ca-certificates python3
 
 # 2. 全局安装 pnpm 和 bun
@@ -22,20 +22,20 @@ RUN npm install
 RUN cd apps/web && npm run build
 
 # ==========================================
-# 阶段 2：运行阶段 (Runner)
+# 阶段 2：运行阶段 (Runner) - 使用 Nginx
 # ==========================================
-FROM node:20-alpine AS runner
+FROM nginx:alpine AS runner
 
-WORKDIR /app
+# 删除默认的 nginx 静态页面
+RUN rm -rf /usr/share/nginx/html/*
 
-# 1. 安装轻量级静态 HTTP 服务器
-RUN npm install -g serve
+# 从构建阶段复制 Next.js 生成的静态文件到 Nginx 的默认目录
+COPY --from=builder /app/apps/web/out /usr/share/nginx/html
 
-# 2. 从构建阶段复制 Next.js 生成的静态文件目录 out
-COPY --from=builder /app/apps/web/out ./out
+# 复制自定义的 Nginx 配置文件
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# 3. 暴露 80 端口
+# 暴露 80 端口
 EXPOSE 80
 
-# 4. 启动静态服务器
-CMD ["serve", "out", "-l", "80"]
+# Nginx 官方镜像自带 CMD ["nginx", "-g", "daemon off;"]，无需额外指定
